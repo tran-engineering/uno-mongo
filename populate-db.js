@@ -70,7 +70,7 @@ const firsti = toGeoJson(gleiskanten[0]);
 
 
 (async function main() {
-    const client = await MongoClient.connect("mongodb://localhost");
+    const client = await MongoClient.connect(process.env.MONGO_URL || "mongodb://localhost");
 
     try {
         console.log("connected");
