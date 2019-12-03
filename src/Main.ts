@@ -1,3 +1,4 @@
+import cors from 'cors';
 import compression from 'compression';
 import * as bodyParser from 'body-parser';
 import { Server } from '@overnightjs/core';
@@ -13,6 +14,7 @@ class TopologyServer extends Server {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(compression());
+        this.app.use(cors());
         const t = new TrackEdgeController(db);
         this.addControllers([t]);
     }
