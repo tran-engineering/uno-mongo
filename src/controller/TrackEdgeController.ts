@@ -14,7 +14,7 @@ export class TrackEdgeController {
     async get(req: Request, res: Response, next: NextFunction): Promise<any> {
         console.log(req.query.lon);
         console.log(req.query.lat);
-        const { lat, lon, runDate } = req.query;
+        const { lat, lon, runDate, maxDistance = 2000 } = req.query;
         if (!lat || !lon) {
             return res.status(400).json({ error: 'Missing lat/lon GET params.' })
         }
@@ -26,7 +26,7 @@ export class TrackEdgeController {
                             type: 'Point',
                             coordinates: [parseFloat(lon), parseFloat(lat)],
                         },
-                        $maxDistance: 4000
+                        $maxDistance: maxDistance
                     }
                 },
                 'properties.GUELTIG_BIS': null
