@@ -8,7 +8,7 @@ import MongoDB from 'mongodb';
 import { TrackEdgeController } from './controller/TrackEdgeController';
 
 class TopologyServer extends Server {
-    private readonly SERVER_STARTED = 'Example server started on port: ';
+    private readonly SERVER_STARTED = 'TopologyServer server started on port: ';
     constructor(private db:MongoDB.Db) {
         super(true);
         this.app.use(bodyParser.json());
@@ -17,9 +17,6 @@ class TopologyServer extends Server {
         this.app.use(cors());
         const t = new TrackEdgeController(db);
         this.addControllers([t]);
-    }
-
-    public async initDb() {
     }
 
     public start(port: number): void {

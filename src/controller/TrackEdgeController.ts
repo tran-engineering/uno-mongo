@@ -6,52 +6,86 @@ import { Logger } from '@overnightjs/logger';
 @Controller('api/v1/trackEdges')
 export class TrackEdgeController {
 
-    constructor(private db: MongoDB.Db) {
+  constructor(private db: MongoDB.Db) {
 
+  }
+
+  @Get()
+  async get(req: Request, res: Response): Promise<any> {
+    console.log(req.query.lon);
+    console.log(req.query.lat);
+    const { lat, lon, runDate, maxDistance = 2000 } = req.query;
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Missing lat/lon GET params.' })
     }
+    try {
+      const query: any = {
+        geometry: {
+          $nearSphere: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [parseFloat(lon), parseFloat(lat)],
+            },
+            $maxDistance: maxDistance
+          }
+        },
+        'properties.GUELTIG_BIS': null
+      };
 
-    @Get()
-    async get(req: Request, res: Response, next: NextFunction): Promise<any> {
-        console.log(req.query.lon);
-        console.log(req.query.lat);
-        const { lat, lon, runDate, maxDistance = 2000 } = req.query;
-        if (!lat || !lon) {
-            return res.status(400).json({ error: 'Missing lat/lon GET params.' })
-        }
-        try {
-            const query:any = {
-                geometry: {
-                    $nearSphere: {
-                        $geometry: {
-                            type: 'Point',
-                            coordinates: [parseFloat(lon), parseFloat(lat)],
-                        },
-                        $maxDistance: maxDistance
-                    }
-                },
-                'properties.GUELTIG_BIS': null
-            };
-
-            let result = await this.db.collection('trackEdge')
-                .find(query,
-                {
-                    projection: {
-                        _id: 0,
-                        'properties.IDT_SPURWEITE':0,
-                        'properties.ID_HISTORY':0,
-                        'properties.ID_PROJEKT':0,
-                        'properties.ID_REPL':0,
-                        'properties.ID_REPL_ER':0,
-                        'properties.KNOTENSEITE_VON':0,
-                        'properties.KNOTENSEITE_BIS':0,
-                        'properties.WEICHENZUGANG_VON':0,                       
-                        'properties.WEICHENZUGANG_BIS':0
-                    }
-                }).toArray();
-            return res.status(200).json(result);
-        } catch (err) {
-            Logger.Err(err);
-            return res.status(500).json(err);
-        }
+      let result = await this.db.collection('trackEdge')
+        .find(query,
+          {
+            projection: {
+              _id: 0,
+              'properties.IDT_SPURWEITE': 0,
+              'properties.ID_HISTORY': 0,
+              'properties.ID_PROJEKT': 0,
+              'properties.ID_REPL': 0,
+              'properties.ID_REPL_ER': 0,
+              'properties.KNOTENSEITE_VON': 0,
+              'properties.KNOTENSEITE_BIS': 0,
+              'properties.WEICHENZUGANG_VON': 0,
+              'properties.WEICHENZUGANG_BIS': 0
+            }
+          }).toArray();
+      return res.status(200).json(result);
+    } catch (err) {
+      Logger.Err(err);
+      return res.status(500).json(err);
     }
+  }
+
+  @Post()
+  async post(req: Request, res: Response) {
+    const {trackEdges} = req.body;
+    try {
+      const query: any = {
+        'properties.GUELTIG_BIS': null,
+        'properties.ID_GLEISKANTE': {
+          $in: trackEdges
+        }
+      };
+
+      let result = await this.db.collection('trackEdge')
+        .find(query,
+          {
+            projection: {
+              _id: 0,
+              'properties.IDT_SPURWEITE': 0,
+              'properties.ID_HISTORY': 0,
+              'properties.ID_PROJEKT': 0,
+              'properties.ID_REPL': 0,
+              'properties.ID_REPL_ER': 0,
+              'properties.KNOTENSEITE_VON': 0,
+              'properties.KNOTENSEITE_BIS': 0,
+              'properties.WEICHENZUGANG_VON': 0,
+              'properties.WEICHENZUGANG_BIS': 0
+            }
+          }).toArray();
+      return res.status(200).json(result);
+    } catch (err) {
+      Logger.Err(err);
+      return res.status(500).json(err);
+    }
+  }
 }
