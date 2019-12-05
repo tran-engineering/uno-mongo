@@ -19,20 +19,22 @@ export class TrackEdgeController {
       return res.status(400).json({ error: 'Missing lat/lon GET params.' })
     }
     try {
+      const center = {
+        type: 'Point',
+        coordinates: [parseFloat(lon), parseFloat(lat)],
+      }
       const query: any = {
         geometry: {
           $nearSphere: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [parseFloat(lon), parseFloat(lat)],
-            },
+            $geometry: center,
             $maxDistance: maxDistance
           }
         },
-        'properties.GUELTIG_BIS': null
+        'properties.GUELTIG_BIS': null,
+        'properties.ERSETZT': null
       };
 
-      let result = await this.db.collection('trackEdge')
+      let features = await this.db.collection('trackEdge')
         .find(query,
           {
             projection: {
@@ -48,7 +50,11 @@ export class TrackEdgeController {
               'properties.WEICHENZUGANG_BIS': 0
             }
           }).toArray();
-      return res.status(200).json(result);
+      return res.status(200).json({
+        type: 'FeatureCollection',
+        features,
+        center
+      });
     } catch (err) {
       Logger.Err(err);
       return res.status(500).json(err);
@@ -57,10 +63,11 @@ export class TrackEdgeController {
 
   @Post()
   async post(req: Request, res: Response) {
-    const {trackEdges} = req.body;
+    const { trackEdges } = req.body;
     try {
       const query: any = {
         'properties.GUELTIG_BIS': null,
+        'properties.ERSETZT': null,
         'properties.ID_GLEISKANTE': {
           $in: trackEdges
         }
@@ -82,7 +89,10 @@ export class TrackEdgeController {
               'properties.WEICHENZUGANG_BIS': 0
             }
           }).toArray();
-      return res.status(200).json(result);
+      return res.status(200).json({
+        type: 'FeatureCollection',
+        features: result
+      });
     } catch (err) {
       Logger.Err(err);
       return res.status(500).json(err);

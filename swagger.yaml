@@ -1,0 +1,115 @@
+swagger: "2.0"
+info:
+  description: "uno topology server"
+  version: "1.0.0"
+  title: "uno-mongo"
+  contact:
+    email: "einstein@sbb.ch"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+basePath: "/api/v1"
+paths:
+  /trackEdges:
+    get:
+      tags:
+      - "trackEdges"
+      summary: "Get all trackedges by lon / lat"
+      description: ""
+      parameters:
+      - in: "query"
+        name: "lon"
+        type: number
+        description: "Longitude"
+        required: true
+        default: 7.423146347570446
+      - in: "query"
+        name: "lat"
+        type: number
+        description: "Latitude"
+        required: true
+        default: 46.95169604261569
+      - in: "query"
+        name: "runDate"
+        type: "string"
+        required: false
+        default: "2019-12-12T08:00:00Z"
+      - in: "query"
+        name: "topologyDate"
+        type: "string"
+        required: false
+        default: "2019-12-12"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/TrackEdgeResponse"
+    post:
+      tags:
+      - "trackEdges"
+      summary: "Get all trackedges by lon / lat"
+      description: "TODO"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "trackEdges"
+        required: true
+        schema:
+          $ref: "#/definitions/TrackEdgeRequest"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/TrackEdgeResponse"
+definitions:
+  TrackEdgeRequest:
+    type: "object"
+    properties:
+      trackEdges:
+        type: "array"
+        items:
+          type: "number"
+      runDate:
+        type: "string"
+        format: "date-time"
+      topologyDate:
+        type: "string"
+        format: "date"
+  TrackEdgeResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum: [FeatureCollection]
+      features:
+        type: "array"
+        items:
+          $ref: "#/definitions/Feature"
+  Feature:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum: [Feature]
+      properties:
+        type: "object"
+      geometry:
+        type: "object"
+        properties:
+          type:
+            type: "string"
+            enum: [LineString,Point]
+          coordinates:
+            type: "array"
+            items:
+              type: "array"
+              items:
+                type: "number"
+                minLength: 2
+                maxLength: 2
